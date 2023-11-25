@@ -5,35 +5,42 @@ const utils = require('./utils');
 
 // fn to create express server
 const create = async () => {
+  // server
+  const app = express();
+  app.use(favicon(path.join(__dirname, '../public', 'favicon.ico')));
 
-    // server
-    const app = express();
-    app.use(favicon(path.join(__dirname, '../public', 'favicon.ico')));
-    
-    // Log request
-    app.use(utils.appLogger);
+  // Log request
+  app.use(utils.appLogger);
 
-    // root route - serve static file
-    app.get('/api/hello', (req, res) => {
-        res.json({hello: 'goodbye'});
-        res.end();
-    });
+  // root route - serve static file
+  app.get('/api/hello', (req, res) => {
+    res.json({ hello: 'goodbye' });
+    res.end();
+  });
 
-    // root route - serve static file
-    app.get('/', (req, res) => {
-        return res.sendFile(path.join(__dirname, '../public/client.html'));
+  // add weather api
+  app.get('/api/random-dog', async (req, res) => {
+    const response = await fetch(
+      'https://dog.ceo/api/breeds/image/random'
+    ).then((res) => res.json());
 
-    });
+    return res.json(response);
+  });
 
-    // Catch errors
-    app.use(utils.logErrors);
-    app.use(utils.clientError404Handler);
-    app.use(utils.clientError500Handler);
-    app.use(utils.errorHandler);
+  // root route - serve static file
+  app.get('/', (req, res) => {
+    return res.sendFile(path.join(__dirname, '../public/client.html'));
+  });
 
-    return app;
+  // Catch errors
+  app.use(utils.logErrors);
+  app.use(utils.clientError404Handler);
+  app.use(utils.clientError500Handler);
+  app.use(utils.errorHandler);
+
+  return app;
 };
 
 module.exports = {
-    create
+  create,
 };
